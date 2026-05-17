@@ -1,0 +1,28 @@
+{
+  "name": "com.unity.multiplayer.playmode",
+  "displayName": "Multiplayer Play Mode",
+  "version": "2.0.0",
+  "unity": "6000.3",
+  "unityRelease": "0b4",
+  "description": "Multiplayer Play Mode is a feature that enables multiple editor instances to be opened simultaneously on the same development device.",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "2.0.2"
+  },
+  "relatedPackages": {
+    "com.unity.multiplayer.workflows.tests.common": "2.0.0",
+    "com.unity.multiplayer.playmode.tests": "2.0.0"
+  },
+  "_upm": {
+    "changelog": "### Added\n- Added Multiplayer local simulation mode to server local instances\n- When deploying remote instances, automatically create a fleet with the correct architecture based on the server's build profile (e.g. if building for ARM64, will automatically create an ARM64 fleet).\n\n### Changed\n- This version only supports Unity 6.3 and beyond. \n- Migrated most of the code to the engine into the Play Mode Framework and the Multiplayer modules. This change is laying the foundation for a more stable and open Play Mode experience.\n- Fixed an issue where the clone editor’s audio toggle would reset every time scripts were reloaded.\n- Updated minimum version of Multiplayer Services packages to 1.2.0-pre.1."
+  },
+  "upmCi": {
+    "footprint": "a29d2386a05a084c3e9d403d74b4429a0379ff21"
+  },
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.multiplayer.playmode@2.0/manual/index.html",
+  "repository": {
+    "url": "https://github.cds.internal.unity3d.com/unity/multiplayer-workflows.git",
+    "type": "git",
+    "revision": "51875cecea03c503adc1abd8b54ba3d97de3ce65"
+  },
+  "_fingerprint": "4df0b85750fb3e6a1ac68c07444c4ce98c1904c8"
+}

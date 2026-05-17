@@ -1,0 +1,33 @@
+{
+    "name": "Unity.Multiplayer.PlayMode.Services.Editor",
+    "rootNamespace": "Unity.Multiplayer.PlayMode.Services.Editor",
+    "references": [
+        "Unity.Multiplayer.PlayMode.Editor",
+        "Unity.Services.Core.Environments.Editor",
+        "Unity.Services.Multiplayer.Multiplay.Authoring.Editor",
+        "Unity.Services.Multiplayer.Multiplay.Authoring.Core",
+        "Unity.Services.DeploymentApi",
+        "Unity.Services.Multiplayer.Editor.Shared"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "MULTIPLAY_API_AVAILABLE"
+    ],
+    "versionDefines": [
+      {
+        "name": "com.unity.services.multiplayer",
+        "expression": "1.2.0-pre.1",
+        "define": "MULTIPLAY_API_AVAILABLE"
+      }
+    ],
+    "noEngineReferences": false
+}
