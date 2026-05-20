@@ -69,7 +69,7 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-
+        isWalking = false;
         readyToJump = true;
 
         startYScale = transform.localScale.y;
@@ -164,7 +164,15 @@ public class PlayerMovement : MonoBehaviour
         {
             moveSpeed = walkSpeed;
             isRunning = false;
-            isWalking = true;
+
+            if (!isRunning && Mathf.Abs(rb.linearVelocity.magnitude) > .1f)
+            {
+                isWalking = true;
+            }
+            else
+            {
+                isWalking = false;
+            }
         }
 
     }
@@ -173,6 +181,8 @@ public class PlayerMovement : MonoBehaviour
     {
         // calculate movement direction
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
+        animator.SetFloat("Input X", horizontalInput);
+        animator.SetFloat("Input Y", verticalInput);
 
         if (Mathf.Abs(rb.linearVelocity.magnitude) > .1f && !isRunning)
         {
