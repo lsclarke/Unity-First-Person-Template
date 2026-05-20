@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -8,8 +8,13 @@ public class PlayerMovement : MonoBehaviour
     private float moveSpeed;
     public float walkSpeed;
     public float sprintSpeed;
+    public bool isWalking = false;
+    public bool isRunning = false;
 
     public float groundDrag;
+
+    [SerializeField]
+    private Animator animator;
 
     [Header("Jumping")]
     public float jumpForce;
@@ -90,6 +95,8 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.linearDamping = 0;
         }
+
+        LinkAnimatorToPlayer();
     }
 
     private void FixedUpdate()
@@ -127,6 +134,13 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+    private void LinkAnimatorToPlayer()
+    {
+        animator.SetBool("On Ground", grounded);
+        animator.SetBool("isWalking", isWalking);
+        animator.SetBool("isRunning", isRunning);
+    }
+
     private void StateHandler()
     {
 
@@ -134,11 +148,23 @@ public class PlayerMovement : MonoBehaviour
         if (grounded && Input.GetKey(sprintKey))
         {
             moveSpeed = sprintSpeed;
+
+            if(Mathf.Abs(rb.linearVelocity.magnitude) > .1f)
+            {
+                isRunning = true;
+                isWalking = false;
+            }
+            else
+            {
+                isRunning = false;
+            }
         }
         // Mode - Walking
         else if (grounded)
         {
             moveSpeed = walkSpeed;
+            isRunning = false;
+            isWalking = true;
         }
 
     }
@@ -147,6 +173,16 @@ public class PlayerMovement : MonoBehaviour
     {
         // calculate movement direction
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
+
+        if (Mathf.Abs(rb.linearVelocity.magnitude) > .1f && !isRunning)
+        {
+            isWalking = true;
+        }
+
+        if (Mathf.Abs(rb.linearVelocity.magnitude) == 0f)
+        {
+            isWalking = false;
+        }
 
         // on slope
         if (OnSlope() && !exitingSlope)
@@ -192,11 +228,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-
-    }
-
     private void ResetPlayerObj()
     {
         PlayerObj.SetActive(true);
@@ -232,6 +263,25 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 GetSlopeMoveDirection()
     {
         return Vector3.ProjectOnPlane(moveDirection, slopeHit.normal).normalized;
+    }
+
+    public Rigidbody getRigidbody()
+    {
+        return rb;
+    }
+
+    public Vector3 getMoveDirection()
+    {
+        return moveDirection;
+    }
+    public float getMoveSpeed()
+    {
+        return moveSpeed;
+    }
+
+    public bool OnGround()
+    {
+        return grounded;
     }
 }
 
