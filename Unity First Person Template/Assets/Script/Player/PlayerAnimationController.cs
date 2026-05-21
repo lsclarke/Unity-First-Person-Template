@@ -6,21 +6,148 @@ public class PlayerAnimationController : MonoBehaviour
 {
     [SerializeField]
     private Animator animator;
+    //Increase performances
+    int isWalkHash;
 
     [SerializeField]
     private PlayerMovement movement;
+    private Vector3 orientationLocation;
 
+    public float acc;
+    public float dec;
+
+    private float velocityX, velocityZ;
+
+    bool wasJustRunning = false;
+    private void Awake()
+    {
+        orientationLocation = transform.localPosition;
+    }
+    private void Start()
+    {
+        //Increase performances
+        isWalkHash = Animator.StringToHash("isWalking");
+        wasJustRunning = false;
+    }
+    private void LinkAnimatorToPlayer()
+    {
+        animator.SetBool("On Ground", movement.OnGround());
+        animator.SetFloat("Velocity X", velocityX);
+        animator.SetFloat("Velocity Z", velocityZ);
+        Debug.Log($"Velocity Z: {acc}");
+        Taunt();
+    }
+
+    public void Taunt()
+    {
+        bool danceButton = UnityEngine.Input.GetKeyDown("q");
+
+        if (danceButton)
+        {
+            animator.SetTrigger("dance");
+        }
+    }
+
+    public void MovementAnimations()
+    {
+
+        //Get key input
+        bool forwardPressed = UnityEngine.Input.GetKey("w");
+        bool backwardPressed = UnityEngine.Input.GetKey("s");
+        bool rightPressed = UnityEngine.Input.GetKey("d");
+        bool leftPressed = UnityEngine.Input.GetKey("a");
+        bool runPressed = UnityEngine.Input.GetKey("left shift");
+
+        if (runPressed)
+        {
+
+            if (forwardPressed)
+            {
+                velocityZ += Time.deltaTime * acc;
+                if (velocityZ >= 5f)
+                {
+                    velocityZ = 5f;
+                }
+            }
+
+            if (backwardPressed)
+            {
+                velocityZ -= Time.deltaTime * acc;
+
+                if (velocityZ <= -5f)
+                {
+                    velocityZ = -5f;
+                }
+            }
+        }
+
+        if (forwardPressed && velocityZ < 1f)
+        {
+            velocityZ += Time.deltaTime * acc;
+        }
+
+        if (!forwardPressed && velocityZ > 0.0f)
+        {
+            velocityZ -= Time.deltaTime * dec;
+
+            if (velocityZ < 0.0f)
+            {
+                velocityZ = 0.0f;   
+            }
+        }
+        //
+
+        if (backwardPressed && velocityZ > -1f)
+        {
+            velocityZ -= Time.deltaTime * acc;
+        }
+
+        if (!backwardPressed && velocityZ < 0.0f)
+        {
+            velocityZ += Time.deltaTime * dec;
+
+            if (velocityZ > 0.0f)
+            {
+                velocityZ = 0.0f;
+            }
+        }
+
+
+        //
+
+        if (rightPressed && velocityX < 1f)
+        {
+            velocityX += Time.deltaTime * acc;
+        }
+        if (!rightPressed && velocityX > 0f)
+        {
+            velocityX -= Time.deltaTime * dec;
+            if (velocityX <= 0.0f)
+            {
+                velocityX = 0.0f;
+            }
+        }
+
+        if (leftPressed && velocityX > -1f)
+        {
+            velocityX -= Time.deltaTime * dec;
+        }
+        if (!leftPressed && velocityX < 0f)
+        {
+            velocityX += Time.deltaTime * dec;
+            if (velocityX >= 5f)
+            {
+                velocityX = 5f;
+            }
+        }
+
+    }
+    
     // Update is called once per frame
     void Update()
     {
-        animator.SetFloat("X Velocity", Mathf.Abs(movement.getMoveSpeed()));
-        animator.SetFloat("Y Velocity", Mathf.Abs(movement.getRigidbody().linearVelocity.z));
-
-        animator.SetFloat("Input Y", movement.getMoveDirection().z);
-
-        animator.SetFloat("Input X", movement.getMoveDirection().x);
-
-        animator.SetBool("On Ground", movement.OnGround());
-
+        LinkAnimatorToPlayer();
+        MovementAnimations();
+        transform.localPosition = orientationLocation;
     }
 }

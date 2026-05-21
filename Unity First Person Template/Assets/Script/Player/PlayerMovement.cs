@@ -13,13 +13,11 @@ public class PlayerMovement : MonoBehaviour
 
     public float groundDrag;
 
-    [SerializeField]
-    private Animator animator;
-
     [Header("Jumping")]
     public float jumpForce;
     public float jumpCooldown;
     public float airMultiplier;
+    public bool jumpButtonPressed = false;
     bool readyToJump;
 
     public GameObject PlayerObj;
@@ -71,7 +69,7 @@ public class PlayerMovement : MonoBehaviour
         rb.freezeRotation = true;
         isWalking = false;
         readyToJump = true;
-
+        jumpButtonPressed = false;
         startYScale = transform.localScale.y;
     }
 
@@ -96,7 +94,6 @@ public class PlayerMovement : MonoBehaviour
             rb.linearDamping = 0;
         }
 
-        LinkAnimatorToPlayer();
     }
 
     private void FixedUpdate()
@@ -134,12 +131,6 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-    private void LinkAnimatorToPlayer()
-    {
-        animator.SetBool("On Ground", grounded);
-        animator.SetBool("isWalking", isWalking);
-        animator.SetBool("isRunning", isRunning);
-    }
 
     private void StateHandler()
     {
@@ -181,8 +172,6 @@ public class PlayerMovement : MonoBehaviour
     {
         // calculate movement direction
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
-        animator.SetFloat("Input X", horizontalInput);
-        animator.SetFloat("Input Y", verticalInput);
 
         if (Mathf.Abs(rb.linearVelocity.magnitude) > .1f && !isRunning)
         {
@@ -249,7 +238,7 @@ public class PlayerMovement : MonoBehaviour
 
         // reset y velocity
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-
+        jumpButtonPressed = true;
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
     }
     private void ResetJump()
@@ -293,6 +282,7 @@ public class PlayerMovement : MonoBehaviour
     {
         return grounded;
     }
+
 }
 
 
