@@ -11,7 +11,14 @@ public class PlayerAnimationController : MonoBehaviour
 
     [SerializeField]
     private PlayerMovement movement;
+
+    [SerializeField]
+    private PlayerInteract interactions;
     private Vector3 orientationLocation;
+
+
+    [SerializeField]
+    private AnimationText animText;
 
     public float acc;
     public float dec;
@@ -32,10 +39,30 @@ public class PlayerAnimationController : MonoBehaviour
     private void LinkAnimatorToPlayer()
     {
         animator.SetBool("On Ground", movement.OnGround());
+        animator.SetBool("JumpButtonPressed", movement.jumpButtonPressed);
         animator.SetFloat("Velocity X", velocityX);
         animator.SetFloat("Velocity Z", velocityZ);
-        Debug.Log($"Velocity Z: {acc}");
         Taunt();
+
+        if (UnityEngine.Input.GetKeyDown("f") && interactions.canInteract)
+        {
+            HoldItem();
+        }
+
+        if (UnityEngine.Input.GetKeyDown("g") && interactions.isInteracting)
+        {
+            DropItem();
+        }
+
+    }
+
+    public void HoldItem()
+    {
+        animator.SetLayerWeight(1,1f);
+    }
+    public void DropItem()
+    {
+        animator.SetLayerWeight(1, 0f);
     }
 
     public void Taunt()
@@ -57,6 +84,35 @@ public class PlayerAnimationController : MonoBehaviour
         bool rightPressed = UnityEngine.Input.GetKey("d");
         bool leftPressed = UnityEngine.Input.GetKey("a");
         bool runPressed = UnityEngine.Input.GetKey("left shift");
+
+        if (velocityX == 0f && velocityZ == 0f)
+        {
+            animText.setCondition("Idle");
+        }
+        if (velocityX > 0f && velocityX <= 2f)
+        {
+            animText.setCondition("Walking");
+        }
+        if (velocityZ > 0f && velocityZ <= 2f)
+        {
+            animText.setCondition("Walking");
+        }
+        if (velocityX > 2f && velocityX <= 3f)
+        {
+            animText.setCondition("Running");
+        }
+        if (velocityZ > 2f && velocityZ <= 3f)
+        {
+            animText.setCondition("Running");
+        }
+        if (velocityX >= 5f)
+        {
+            animText.setCondition("Running");
+        }
+        if (velocityZ >= 5f)
+        {
+            animText.setCondition("Running");
+        }
 
         if (runPressed)
         {

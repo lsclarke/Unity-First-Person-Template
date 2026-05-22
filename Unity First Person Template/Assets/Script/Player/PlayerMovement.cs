@@ -5,6 +5,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
     public float stompTimer = 0;
+    [SerializeField]
     private float moveSpeed;
     public float walkSpeed;
     public float sprintSpeed;
@@ -19,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     public float airMultiplier;
     public bool jumpButtonPressed = false;
     bool readyToJump;
+    bool playerLanded = false;  
 
     public GameObject PlayerObj;
 
@@ -70,7 +72,9 @@ public class PlayerMovement : MonoBehaviour
         isWalking = false;
         readyToJump = true;
         jumpButtonPressed = false;
+        playerLanded = false;
         startYScale = transform.localScale.y;
+
     }
 
     private void Update()
@@ -88,12 +92,16 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.linearDamping = groundDrag;
             Invoke(nameof(ResetPlayerObj), 0.1f);
+
+            if (!isRunning)
+            {
+                moveSpeed = walkSpeed;
+            }
         }
         else
         {
             rb.linearDamping = 0;
         }
-
     }
 
     private void FixedUpdate()
@@ -172,36 +180,37 @@ public class PlayerMovement : MonoBehaviour
     {
         // calculate movement direction
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
+        rb.AddForce(new Vector3(0f,0f,1f * 10f), ForceMode.Force);
 
-        if (Mathf.Abs(rb.linearVelocity.magnitude) > .1f && !isRunning)
-        {
-            isWalking = true;
-        }
+        //if (Mathf.Abs(rb.linearVelocity.magnitude) > .1f && !isRunning)
+        //{
+        //    isWalking = true;
+        //}
 
-        if (Mathf.Abs(rb.linearVelocity.magnitude) == 0f)
-        {
-            isWalking = false;
-        }
+        //if (Mathf.Abs(rb.linearVelocity.magnitude) == 0f)
+        //{
+        //    isWalking = false;
+        //}
 
         // on slope
-        if (OnSlope() && !exitingSlope)
-        {
-            rb.AddForce(GetSlopeMoveDirection() * moveSpeed * 20f, ForceMode.Force);
+        //if (OnSlope() && !exitingSlope)
+        //{
+        //    rb.AddForce(GetSlopeMoveDirection() * moveSpeed * 20f, ForceMode.Force);
 
-            if (rb.linearVelocity.y > 0)
-                rb.AddForce(Vector3.down * 80f, ForceMode.Force);
-        }
+        //    if (rb.linearVelocity.y > 0)
+        //        rb.AddForce(Vector3.down * 80f, ForceMode.Force);
+        //}
 
         // on ground
-        else if (grounded)
-            rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
+        ///*else */if (grounded)
+        //    //rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
 
-        // in air
-        else if (!grounded)
-            rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
+        //// in air
+        //else if (!grounded)
+        //    //rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
-        // turn gravity off while on slope
-        rb.useGravity = !OnSlope();
+        //// turn gravity off while on slope
+        //rb.useGravity = !OnSlope();
     }
 
     private void SpeedControl()
