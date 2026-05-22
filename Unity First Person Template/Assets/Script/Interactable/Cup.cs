@@ -57,4 +57,13 @@ public class Cup : MonoBehaviour, IInteractable
         }
     }
 
+    private void OnTriggerEnter(Collider collision)
+    {
+        if (collider.gameObject.CompareTag("ResetItemLocation"))
+        {
+            isPickedUp = false;
+            transform.position = originalPosition.position;
+        }
+    }
+
 }

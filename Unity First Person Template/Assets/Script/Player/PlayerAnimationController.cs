@@ -114,6 +114,11 @@ public class PlayerAnimationController : MonoBehaviour
             animText.setCondition("Running");
         }
 
+        if (movement.jumpButtonPressed && !movement.OnGround())
+        {
+            animText.setCondition("Jumping");
+        }
+
         if (runPressed)
         {
 

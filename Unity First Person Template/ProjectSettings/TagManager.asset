@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Ground
   - Interactable
+  - CinemachineTarget
+  - ResetItemLocation
   layers:
   - Default
   - TransparentFX

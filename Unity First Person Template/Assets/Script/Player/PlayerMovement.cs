@@ -102,7 +102,10 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.linearDamping = 0;
         }
+
     }
+
+
 
     private void FixedUpdate()
     {
@@ -180,37 +183,36 @@ public class PlayerMovement : MonoBehaviour
     {
         // calculate movement direction
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
-        rb.AddForce(new Vector3(0f,0f,1f * 10f), ForceMode.Force);
 
-        //if (Mathf.Abs(rb.linearVelocity.magnitude) > .1f && !isRunning)
-        //{
-        //    isWalking = true;
-        //}
+        if (Mathf.Abs(rb.linearVelocity.magnitude) > .1f && !isRunning)
+        {
+            isWalking = true;
+        }
 
-        //if (Mathf.Abs(rb.linearVelocity.magnitude) == 0f)
-        //{
-        //    isWalking = false;
-        //}
+        if (Mathf.Abs(rb.linearVelocity.magnitude) == 0f)
+        {
+            isWalking = false;
+        }
 
         // on slope
-        //if (OnSlope() && !exitingSlope)
-        //{
-        //    rb.AddForce(GetSlopeMoveDirection() * moveSpeed * 20f, ForceMode.Force);
+        if (OnSlope() && !exitingSlope)
+        {
+            rb.AddForce(GetSlopeMoveDirection() * moveSpeed * 20f, ForceMode.Force);
 
-        //    if (rb.linearVelocity.y > 0)
-        //        rb.AddForce(Vector3.down * 80f, ForceMode.Force);
-        //}
+            if (rb.linearVelocity.y > 0)
+                rb.AddForce(Vector3.down * 80f, ForceMode.Force);
+        }
 
         // on ground
-        ///*else */if (grounded)
-        //    //rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
+        else if (grounded)
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
 
-        //// in air
-        //else if (!grounded)
-        //    //rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
+        // in air
+        else if (!grounded)
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
-        //// turn gravity off while on slope
-        //rb.useGravity = !OnSlope();
+        // turn gravity off while on slope
+        rb.useGravity = !OnSlope();
     }
 
     private void SpeedControl()
