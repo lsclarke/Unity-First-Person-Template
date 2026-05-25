@@ -21,6 +21,6 @@ public class AnimationText : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        animationText.text = "{" + $"{condition}" + "}";
+        animationText.text = "Player Animation State: {" + $"{condition}" + "}";
     }
 }

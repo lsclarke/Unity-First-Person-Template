@@ -15,6 +15,6 @@ public class TimerText : MonoBehaviour
         int min = Mathf.FloorToInt(elapseTime/60);
         int sec = Mathf.FloorToInt(elapseTime % 60);
 
-        timerText.text = "Time Spent {" + string.Format("{0:00}:{1:00}",min,sec) + "}";
+        timerText.text = "Time Spent: {" + string.Format("{0:00}:{1:00}",min,sec) + "}";
     }
 }

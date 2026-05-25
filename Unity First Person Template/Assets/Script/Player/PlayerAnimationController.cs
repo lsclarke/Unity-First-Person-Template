@@ -26,6 +26,11 @@ public class PlayerAnimationController : MonoBehaviour
     private float velocityX, velocityZ;
 
     bool wasJustRunning = false;
+
+    [SerializeField]
+    private PlayerHealth health;
+    
+    private float transitionValue = 0f;
     private void Awake()
     {
         orientationLocation = transform.localPosition;
@@ -42,6 +47,7 @@ public class PlayerAnimationController : MonoBehaviour
         animator.SetBool("JumpButtonPressed", movement.jumpButtonPressed);
         animator.SetFloat("Velocity X", velocityX);
         animator.SetFloat("Velocity Z", velocityZ);
+        animator.SetBool("isHurt", health.isHurt);
         Taunt();
 
         if (UnityEngine.Input.GetKeyDown("f") && interactions.canInteract)
@@ -54,6 +60,37 @@ public class PlayerAnimationController : MonoBehaviour
             DropItem();
         }
 
+        if (health.isHurt)
+        {
+            HurtAnimationStart();
+        }
+        else
+        {
+            HurtAnimationEnd();
+        }
+
+    }
+
+    public void HurtAnimationStart()
+    {
+        transitionValue += 0.025f;
+        animator.SetLayerWeight(2, transitionValue);
+
+        if (transitionValue >= 1f)
+        {
+            transitionValue = 1f;
+        }
+    }
+
+    public void HurtAnimationEnd()
+    {
+        transitionValue -= 0.025f;
+        animator.SetLayerWeight(2, transitionValue);
+
+        if(transitionValue <= 0f)
+        {
+            transitionValue = 0f;
+        }
     }
 
     public void HoldItem()

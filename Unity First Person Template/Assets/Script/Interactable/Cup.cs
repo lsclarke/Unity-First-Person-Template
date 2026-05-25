@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Cup : MonoBehaviour, IInteractable
@@ -9,7 +10,7 @@ public class Cup : MonoBehaviour, IInteractable
     private PlayerInteract interaction;
     private Collider collider;
 
-    private Rigidbody rb;
+    public Transform oldParent;
 
     //Check for ground
     [Header("Ground Check")]
@@ -21,9 +22,15 @@ public class Cup : MonoBehaviour, IInteractable
     private void Start()
     {
         originalPosition = this.transform;
+        originalPosition.localPosition = this.transform.localPosition;
         collider = GetComponent<Collider>();
         isPickedUp=false;
-        rb=GetComponent<Rigidbody>();
+
+    }
+
+    Transform IInteractable.OriginalTransform()
+    {
+        return originalPosition;
     }
 
     void IInteractable.Interact()
@@ -46,14 +53,16 @@ public class Cup : MonoBehaviour, IInteractable
         }
         else
         {
-            transform.parent = null;
-            transform.position = originalPosition.position;
+            transform.parent = oldParent;
+            transform.localPosition = originalPosition.localPosition;
+            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             collider.enabled = true;
         }
 
         if (Input.GetKeyDown("g"))
         {
             isPickedUp = false;
+            transform.localPosition = originalPosition.localPosition;
         }
     }
 

@@ -9,6 +9,6 @@ public class ItemText : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        itemText.text = "Item In Hand {" + $"{interaction.getName()}" + "}";
+        itemText.text = "Item In Hand: {" + $"{interaction.getName()}" + "}";
     }
 }

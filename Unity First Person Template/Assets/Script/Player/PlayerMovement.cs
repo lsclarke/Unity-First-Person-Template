@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 
@@ -13,6 +14,10 @@ public class PlayerMovement : MonoBehaviour
     public bool isRunning = false;
 
     public float groundDrag;
+
+    [Header("Stamina")]
+    private float stamina = 0f;
+    const float MAX_STAMINA = 100F;
 
     [Header("Jumping")]
     public float jumpForce;
@@ -40,6 +45,10 @@ public class PlayerMovement : MonoBehaviour
     public float playerHeight;
     public LayerMask whatIsGround;
     bool grounded;
+
+    public PhysicsMaterial[] physicsMaterialsArray;
+    [SerializeField]
+    private CapsuleCollider playerObject;
 
     [Header("Slope Handling")]
     public float maxSlopeAngle;
@@ -74,7 +83,19 @@ public class PlayerMovement : MonoBehaviour
         jumpButtonPressed = false;
         playerLanded = false;
         startYScale = transform.localScale.y;
+        stamina = MAX_STAMINA;
+    }
 
+    public float GetPlayerStamina
+    {
+        get{
+            return stamina;
+        }
+
+        set
+        {
+            stamina = value;
+        }
     }
 
     private void Update()
@@ -112,6 +133,17 @@ public class PlayerMovement : MonoBehaviour
         MovePlayer();
     }
 
+    public void Friction()
+    {
+        if (grounded)
+        {
+            playerObject.material = physicsMaterialsArray[0];
+        }
+        else
+        {
+            playerObject.material = physicsMaterialsArray[1];
+        }
+    }
     private void MyInput()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -145,9 +177,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void StateHandler()
     {
+        if (Input.GetKeyUp(sprintKey) && stamina < MAX_STAMINA) 
+        {
+            Invoke("resetStamina", 0.1f);
+        }
 
         // Mode - Sprinting
-        if (grounded && Input.GetKey(sprintKey))
+        if (grounded && Input.GetKey(sprintKey) && stamina > 0f)
         {
             moveSpeed = sprintSpeed;
 
@@ -155,6 +191,14 @@ public class PlayerMovement : MonoBehaviour
             {
                 isRunning = true;
                 isWalking = false;
+
+                stamina -= Time.deltaTime * 10f;
+
+                // Set Stamina to 0
+                if (stamina <= 0f)
+                {
+                    stamina = 0f;
+                }
             }
             else
             {
@@ -176,13 +220,20 @@ public class PlayerMovement : MonoBehaviour
                 isWalking = false;
             }
         }
+    }
 
+    IEnumerator resetStamina()
+    {
+        yield return new WaitForSeconds(5f);
+        stamina = MAX_STAMINA;
     }
 
     private void MovePlayer()
     {
         // calculate movement direction
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
+
+        Friction();
 
         if (Mathf.Abs(rb.linearVelocity.magnitude) > .1f && !isRunning)
         {
@@ -192,6 +243,11 @@ public class PlayerMovement : MonoBehaviour
         if (Mathf.Abs(rb.linearVelocity.magnitude) == 0f)
         {
             isWalking = false;
+        }
+
+        if (stamina <= 0f)
+        {
+            StartCoroutine("resetStamina");
         }
 
         // on slope
@@ -212,7 +268,7 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
         // turn gravity off while on slope
-        rb.useGravity = !OnSlope();
+        //rb.useGravity = !OnSlope();
     }
 
     private void SpeedControl()
