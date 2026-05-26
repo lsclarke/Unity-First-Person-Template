@@ -7,6 +7,8 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement")]
     public float stompTimer = 0;
     [SerializeField]
+
+    public bool canMove;
     private float moveSpeed;
     public float walkSpeed;
     public float sprintSpeed;
@@ -55,7 +57,10 @@ public class PlayerMovement : MonoBehaviour
     private RaycastHit slopeHit;
     private bool exitingSlope;
 
+    [Header("Ledge Handling")]
 
+    [SerializeField]
+    private PlayerLedge ledge;
     public Transform orientation;
 
     float horizontalInput;
@@ -79,6 +84,7 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         isWalking = false;
+        canMove = true;
         readyToJump = true;
         jumpButtonPressed = false;
         playerLanded = false;
@@ -130,12 +136,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        MovePlayer();
+        if (canMove)
+        {
+            MovePlayer();
+        }
     }
 
     public void Friction()
     {
-        if (grounded)
+        if (grounded || ledge.isHanging)
         {
             playerObject.material = physicsMaterialsArray[0];
         }
@@ -262,9 +271,11 @@ public class PlayerMovement : MonoBehaviour
         // on ground
         else if (grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
-
+        //on ledge
+        else if (ledge.isHanging)
+            return;
         // in air
-        else if (!grounded)
+        else if (!grounded && !ledge.isHanging)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
         // turn gravity off while on slope

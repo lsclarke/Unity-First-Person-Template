@@ -11,7 +11,8 @@ public class PlayerAnimationController : MonoBehaviour
 
     [SerializeField]
     private PlayerMovement movement;
-
+    [SerializeField]
+    private PlayerLedge ledge;
     [SerializeField]
     private PlayerInteract interactions;
     private Vector3 orientationLocation;
@@ -31,6 +32,7 @@ public class PlayerAnimationController : MonoBehaviour
     private PlayerHealth health;
     
     private float transitionValue = 0f;
+    private float transitionHangValue = 0f;
     private void Awake()
     {
         orientationLocation = transform.localPosition;
@@ -69,6 +71,21 @@ public class PlayerAnimationController : MonoBehaviour
             HurtAnimationEnd();
         }
 
+        if (ledge != null)
+        {
+            animator.SetBool("isHanging", ledge.isHanging);
+            if (ledge.isHanging)
+            {
+                HangAnimationStart();
+            }
+            else
+            {
+                HangAnimationEnd();
+            }
+          
+                
+        }
+
     }
 
     public void HurtAnimationStart()
@@ -91,6 +108,16 @@ public class PlayerAnimationController : MonoBehaviour
         {
             transitionValue = 0f;
         }
+    }
+
+    public void HangAnimationStart()
+    {
+        animator.SetLayerWeight(3, 1);
+    }
+
+    public void HangAnimationEnd()
+    {
+        animator.SetLayerWeight(3, 0);
     }
 
     public void HoldItem()

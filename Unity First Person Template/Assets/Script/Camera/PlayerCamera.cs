@@ -17,6 +17,9 @@ public class PlayerCamera : MonoBehaviour
 
     private float xRotation;
     private float yRotation;
+
+    [SerializeField]
+    private PlayerLedge Onledge;
     private void Start()
     {
         //Disable Cursor
@@ -41,7 +44,11 @@ public class PlayerCamera : MonoBehaviour
 
         //rotate camera and orientation
         transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
-        orientation.rotation = Quaternion.Euler(0f, yRotation, 0f);
-        playerObj.forward = orientation.forward;
+
+        if (!Onledge.isHanging)
+        {
+            playerObj.forward = orientation.forward;
+            orientation.rotation = Quaternion.Euler(0f, yRotation, 0f);
+        }
     }
 }
