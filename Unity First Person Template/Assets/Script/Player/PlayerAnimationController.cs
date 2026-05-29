@@ -43,6 +43,12 @@ public class PlayerAnimationController : MonoBehaviour
         isWalkHash = Animator.StringToHash("isWalking");
         wasJustRunning = false;
     }
+
+    public Animator getAnimator()
+    {
+        return animator;
+    }
+
     private void LinkAnimatorToPlayer()
     {
         animator.SetBool("On Ground", movement.OnGround());
@@ -50,7 +56,9 @@ public class PlayerAnimationController : MonoBehaviour
         animator.SetFloat("Velocity X", velocityX);
         animator.SetFloat("Velocity Z", velocityZ);
         animator.SetBool("isHurt", health.isHurt);
+        animator.SetBool("isHanging", ledge.isHanging);
         Taunt();
+        Point();
 
         if (UnityEngine.Input.GetKeyDown("f") && interactions.canInteract)
         {
@@ -71,21 +79,16 @@ public class PlayerAnimationController : MonoBehaviour
             HurtAnimationEnd();
         }
 
-        if (ledge != null)
+        if(ledge.isHanging)
         {
-            animator.SetBool("isHanging", ledge.isHanging);
-            if (ledge.isHanging)
-            {
-                HangAnimationStart();
-            }
-            else
-            {
-                HangAnimationEnd();
-            }
-          
-                
+            HangAnimationStart();
         }
 
+        //Drop from ledge
+        if(!ledge.isHanging || movement.getMoveDirection().y  == -1f)
+        {
+            HangAnimationEnd();
+        }
     }
 
     public void HurtAnimationStart()
@@ -124,6 +127,7 @@ public class PlayerAnimationController : MonoBehaviour
     {
         animator.SetLayerWeight(1,1f);
     }
+
     public void DropItem()
     {
         animator.SetLayerWeight(1, 0f);
@@ -132,10 +136,26 @@ public class PlayerAnimationController : MonoBehaviour
     public void Taunt()
     {
         bool danceButton = UnityEngine.Input.GetKeyDown("q");
-
         if (danceButton)
         {
             animator.SetTrigger("dance");
+        }
+    }
+
+    public void Point()
+    {
+        //Get key input
+        bool rmb = UnityEngine.Input.GetKey("e");
+        var value = 0f;
+        if (rmb)
+        {
+            value += 0.01f;
+            animator.SetLayerWeight(4, value);
+
+            if (value >= 1f)
+            {
+                value = 1f;
+            }
         }
     }
 

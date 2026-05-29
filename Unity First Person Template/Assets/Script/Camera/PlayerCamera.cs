@@ -18,8 +18,21 @@ public class PlayerCamera : MonoBehaviour
     private float xRotation;
     private float yRotation;
 
+    private Transform originalTransform;
+    private Transform originalPlayerObj;
+    private Transform originalOrientation;
+
+
     [SerializeField]
-    private PlayerLedge Onledge;
+    private PlayerLedge ledge;
+
+
+    private void Awake()
+    {
+        originalTransform = transform;
+        originalPlayerObj = playerObj;
+        originalOrientation = orientation;
+    }
     private void Start()
     {
         //Disable Cursor
@@ -28,9 +41,24 @@ public class PlayerCamera : MonoBehaviour
     }
 
 
-
-
     private void Update()
+    {
+        if (!ledge.isHanging)
+        {
+            StandardFPSCamera();
+
+        }
+        else
+        {
+            if (!ledge.isClimbing)
+                LedgeFPSCamera();
+        }
+
+
+
+    }
+
+    private void StandardFPSCamera()
     {
         float mouseX = Input.GetAxis("Mouse X") * Time.deltaTime * mouseSenX;
         float mouseY = Input.GetAxis("Mouse Y") * Time.deltaTime * mouseSenY;
@@ -45,10 +73,23 @@ public class PlayerCamera : MonoBehaviour
         //rotate camera and orientation
         transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
 
-        if (!Onledge.isHanging)
-        {
-            playerObj.forward = orientation.forward;
-            orientation.rotation = Quaternion.Euler(0f, yRotation, 0f);
-        }
+        playerObj.forward = orientation.forward;
+        orientation.rotation = Quaternion.Euler(0f, yRotation, 0f);
+
+    }
+
+    private void LedgeFPSCamera()
+    {
+        float mouseX = Input.GetAxis("Mouse X") * Time.deltaTime * mouseSenX;
+        float mouseY = Input.GetAxis("Mouse Y") * Time.deltaTime * mouseSenY;
+
+        yRotation += mouseX;
+        xRotation -= mouseY;
+
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        yRotation = Mathf.Clamp(yRotation, -90f, 90f);
+
+        transform.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
+        //orientation.rotation = Quaternion.Euler(0f, yRotation, 0f);
     }
 }

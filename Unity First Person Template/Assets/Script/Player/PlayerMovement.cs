@@ -46,7 +46,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Ground Check")]
     public float playerHeight;
     public LayerMask whatIsGround;
-    bool grounded;
+    public bool grounded;
 
     public PhysicsMaterial[] physicsMaterialsArray;
     [SerializeField]
@@ -107,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         // ground check
-        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight /** 0.5f + 0.2f*/, whatIsGround);
+        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight, whatIsGround);
 
         Debug.DrawLine(this.transform.position, new Vector3(transform.position.x, transform.position.y - (playerHeight * 0.5f + 0.2f), transform.position.z), Color.yellow);
         MyInput();
@@ -144,7 +144,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Friction()
     {
-        if (grounded || ledge.isHanging)
+        if (grounded || ledge.isClimbing)
         {
             playerObject.material = physicsMaterialsArray[0];
         }
@@ -159,7 +159,7 @@ public class PlayerMovement : MonoBehaviour
         verticalInput = Input.GetAxisRaw("Vertical");
 
         // when to jump
-        if (Input.GetKey(jumpKey) && readyToJump && grounded)
+        if (Input.GetKey(jumpKey) && readyToJump && grounded && !ledge.CanPlayerClimb() && !ledge.isClimbing)
         {
             readyToJump = false;
 
@@ -272,10 +272,10 @@ public class PlayerMovement : MonoBehaviour
         else if (grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
         //on ledge
-        else if (ledge.isHanging)
-            return;
+        //else if (ledge.isHanging)
+        //    rb.AddForce(moveDirection.normalized * walkSpeed * .2f, ForceMode.Force);
         // in air
-        else if (!grounded && !ledge.isHanging)
+        else if (!grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
         // turn gravity off while on slope
@@ -345,6 +345,15 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody getRigidbody()
     {
         return rb;
+    }
+    public void setMoveDirection(Vector3 value)
+    {
+        moveDirection = value;
+    }
+
+    public void setMoveDirectionY(float value)
+    {
+         moveDirection.y = value;
     }
 
     public Vector3 getMoveDirection()
