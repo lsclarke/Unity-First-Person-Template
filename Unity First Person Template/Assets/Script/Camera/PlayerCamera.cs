@@ -25,7 +25,7 @@ public class PlayerCamera : MonoBehaviour
 
     [SerializeField]
     private PlayerLedge ledge;
-
+    public bool ledgeCamera  = false;
 
     private void Awake()
     {
@@ -43,18 +43,15 @@ public class PlayerCamera : MonoBehaviour
 
     private void Update()
     {
-        if (!ledge.isHanging)
+        if (ledgeCamera)
         {
-            StandardFPSCamera();
+            LedgeFPSCamera();
 
         }
         else
         {
-            if (!ledge.isClimbing)
-                LedgeFPSCamera();
+            StandardFPSCamera();
         }
-
-
 
     }
 
@@ -80,8 +77,8 @@ public class PlayerCamera : MonoBehaviour
 
     private void LedgeFPSCamera()
     {
-        float mouseX = Input.GetAxis("Mouse X") * Time.deltaTime * mouseSenX;
-        float mouseY = Input.GetAxis("Mouse Y") * Time.deltaTime * mouseSenY;
+        float mouseX = Input.GetAxis("Mouse X") * Time.deltaTime * mouseSenX/2f;
+        float mouseY = Input.GetAxis("Mouse Y") * Time.deltaTime * mouseSenY/2f;
 
         yRotation += mouseX;
         xRotation -= mouseY;

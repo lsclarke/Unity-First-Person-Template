@@ -57,6 +57,8 @@ public class PlayerAnimationController : MonoBehaviour
         animator.SetFloat("Velocity Z", velocityZ);
         animator.SetBool("isHurt", health.isHurt);
         animator.SetBool("isHanging", ledge.isHanging);
+        animator.SetBool("StartHang", ledge.GetStartClimb());
+        animator.SetBool("ClimbUp", ledge.GetStartClimbOnTop());
         Taunt();
         Point();
 
@@ -79,16 +81,6 @@ public class PlayerAnimationController : MonoBehaviour
             HurtAnimationEnd();
         }
 
-        if(ledge.isHanging)
-        {
-            HangAnimationStart();
-        }
-
-        //Drop from ledge
-        if(!ledge.isHanging || movement.getMoveDirection().y  == -1f)
-        {
-            HangAnimationEnd();
-        }
     }
 
     public void HurtAnimationStart()

@@ -144,7 +144,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Friction()
     {
-        if (grounded || ledge.isClimbing)
+        if (grounded || ledge.isHanging)
         {
             playerObject.material = physicsMaterialsArray[0];
         }
@@ -159,7 +159,7 @@ public class PlayerMovement : MonoBehaviour
         verticalInput = Input.GetAxisRaw("Vertical");
 
         // when to jump
-        if (Input.GetKey(jumpKey) && readyToJump && grounded && !ledge.CanPlayerClimb() && !ledge.isClimbing)
+        if (Input.GetKey(jumpKey) && readyToJump && grounded && !ledge.GetCanClimb())
         {
             readyToJump = false;
 

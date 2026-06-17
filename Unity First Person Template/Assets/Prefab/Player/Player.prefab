@@ -105,7 +105,7 @@ CapsuleCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 1024
+    m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
@@ -127,7 +127,7 @@ GameObject:
   m_Layer: 0
   m_Name: Camera Position
   m_TagString: Untagged
-  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -158,7 +158,7 @@ GameObject:
   m_Layer: 0
   m_Name: LedgeChecker
   m_TagString: Untagged
-  m_Icon: {fileID: 3443629218296621865, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -171,7 +171,7 @@ Transform:
   m_GameObject: {fileID: 2046230704885698445}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.84, z: 0.297}
+  m_LocalPosition: {x: 0, y: 0.75, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -421,7 +421,7 @@ MonoBehaviour:
   playerHeight: 1.1
   whatIsGround:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1088
   grounded: 0
   physicsMaterialsArray:
   - {fileID: 13400000, guid: 4f6081890f015a84294d88f76db8a1fc, type: 2}
@@ -459,31 +459,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53e8ec9a312be3d47af4a0fd1566dfe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLedge
-  playerMovement: {fileID: 0}
-  playerAnimationController: {fileID: 0}
-  ledgeForwardPosition: {x: 0, y: 0, z: 0}
+  playerMovement: {fileID: 2648408379852710366}
+  playerAnimationController: {fileID: 7898890520172565444}
+  playerCamera: {fileID: 0}
+  capsuleCollider: {fileID: 5294682993575041482}
+  playerObjectModel: {fileID: 7848870354083526125}
   ledgeChecker: {fileID: 3705475781152786866}
-  playerObj: {fileID: 7848870354083526125}
-  rayAmount: 10
-  rayDistance: 0
-  rayHeight: 0
-  rayOffsetY: 0
+  rayLength: 1
   ledgeMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1024
   ledgeObject: {fileID: 0}
-  ledgeHeight: -1.25
-  offsetZ: 0
-  offsetY: 0.12
+  ledgeHeight: 2
+  offsetZ: -0.03
+  offsetY: -1.2
   offsetX: 0
-  isClimbing: 1
+  Switch: 0
   isHanging: 0
-  canMoveOnLedge: 0
-  isMovingOnLedge: 0
-  isCorner: 0
-  noSpaceRight: 0
-  noSpaceLeft: 0
-  capsuleCollider: {fileID: 0}
 --- !u!54 &6924160685618072545
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -511,6 +503,37 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
+--- !u!1 &6994117502243242408
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4672889798467959736}
+  m_Layer: 0
+  m_Name: Climb Camera Position
+  m_TagString: Untagged
+  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4672889798467959736
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6994117502243242408}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.028, y: 1.273, z: -1.138}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 426328980054964068}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7654508114619481176
 GameObject:
   m_ObjectHideFlags: 0
@@ -541,6 +564,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1962180306884202481}
+  - {fileID: 4672889798467959736}
   - {fileID: 3705475781152786866}
   m_Father: {fileID: 474316893474274462}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
