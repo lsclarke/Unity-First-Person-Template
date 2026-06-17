@@ -471,11 +471,17 @@ MonoBehaviour:
     m_Bits: 1024
   ledgeObject: {fileID: 0}
   ledgeHeight: 2
-  offsetZ: -0.03
+  offsetZ: 0.02
   offsetY: -1.2
   offsetX: 0
+  offsetYMoveOnLedge: 0.4
+  offsetXMoveOnLedge: 0.15
   Switch: 0
   isHanging: 0
+  climbButton: 32
+  moveRightButton: 100
+  moveLeftButton: 97
+  ledgeMoveSpeed: 1
 --- !u!54 &6924160685618072545
 Rigidbody:
   m_ObjectHideFlags: 0
