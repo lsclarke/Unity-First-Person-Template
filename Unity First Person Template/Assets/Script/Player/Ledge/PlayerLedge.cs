@@ -28,6 +28,7 @@ public class PlayerLedge : MonoBehaviour
     public float rayLength;
     public LayerMask ledgeMask;
     private RaycastHit climbabableRay;
+    private RaycastHit cornerLedgeRay;
 
     //The gameObject of the collider hit by the RaycastHit variable "climbableRay".
     [SerializeField]
@@ -46,6 +47,8 @@ public class PlayerLedge : MonoBehaviour
     public float offsetX;
     private Vector3 hangPosition;
 
+    [SerializeField]
+    private float offset = -0.01f;
     public float offsetYMoveOnLedge;
     public float offsetXMoveOnLedge;
     [Space(10f)]
@@ -60,9 +63,14 @@ public class PlayerLedge : MonoBehaviour
     private bool canClimbOnTop = false;
     private bool startClimbOnTop = false;
     public bool isHanging;
+    private bool canMove;
     private bool canMoveLeft;
     private bool canMoveRight;
+    [SerializeField]
+    private bool canTurnCorner;
+    private bool isTurningCorner;
     private bool endHang;
+    private bool dropFromLedge;
 
     [Space(10f)]
 
@@ -87,6 +95,7 @@ public class PlayerLedge : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         canMoveLeft = false;
         canMoveRight = false;
+        canMove = true;
     }
 
     private void FixedUpdate()
@@ -94,19 +103,25 @@ public class PlayerLedge : MonoBehaviour
         PlayerLedgeMovement();
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(hangPosition, .25f);
+    }
+
     private void Update()
     {
         //Master bool switch for checking ledges
         if (Switch)
         {
-
-            if (!isHanging)
-            {
-                CheckForLedge();
-            }
-            else
-            {
-                CheckForTopSurface();
+            if (!isTurningCorner) {
+                if (!isHanging)
+                {
+                    CheckForLedge();
+                }
+                else
+                {
+                    CheckForTopSurface();
+                }
             }
                 FaceForward();
 
@@ -144,7 +159,6 @@ public class PlayerLedge : MonoBehaviour
         if (Physics.Raycast(ledgeChecker.position, ledgeChecker.forward, out climbabableRay, rayLength + 0.5f, ledgeMask))
         {
             //Spawn debug ray in scene.
-            Debug.Log($"Face :: {-climbabableRay.normal}");
             Debug.DrawRay(ledgeChecker.position, ledgeChecker.forward * rayLength, Color.green);
 
             //Set player controller to face ledge
@@ -163,33 +177,74 @@ public class PlayerLedge : MonoBehaviour
     //This method is responsible for making sure the player faces the surface ledge 
     private void MoveOnLedgeChecker()
     {
-        Debug.DrawRay(ledgeChecker.position + Vector3.up * offsetYMoveOnLedge + Vector3.right * offsetXMoveOnLedge, ledgeChecker.forward * rayLength, Color.red);
-        Debug.DrawRay(ledgeChecker.position + Vector3.up * offsetYMoveOnLedge + Vector3.right * -offsetXMoveOnLedge, ledgeChecker.forward * rayLength, Color.red);
-        //Right Ledge Movement Checker
-        if (Physics.Raycast(ledgeChecker.position + Vector3.up * offsetYMoveOnLedge + Vector3.right * offsetXMoveOnLedge, ledgeChecker.forward, out climbabableRay, rayLength + 0.5f, ledgeMask))
+        if (canMove)
         {
-            //Spawn debug ray in scene.
-            Debug.Log($"Can Move Right :: {canMoveRight}");
-            canMoveRight = true;
-        }
-        else
-        {
-            canMoveRight = false;
-        }
+            Debug.DrawRay(ledgeChecker.position + Vector3.up * offsetYMoveOnLedge + Vector3.right * offsetXMoveOnLedge, ledgeChecker.forward * rayLength, Color.red);
+            Debug.DrawRay(ledgeChecker.position + Vector3.up * offsetYMoveOnLedge + Vector3.right * -offsetXMoveOnLedge, ledgeChecker.forward * rayLength, Color.red);
+
+            //Right Ledge Movement Checker
+            if (Physics.Raycast(ledgeChecker.position + Vector3.up * offsetYMoveOnLedge + Vector3.right * offsetXMoveOnLedge, ledgeChecker.forward, out climbabableRay, rayLength + 0.5f, ledgeMask))
+            {
+                canMoveRight = true;
+            }
+            else
+            {
+                canMoveRight = false;
+            }
 
 
-        //Left Ledge Movement Checker
-        if (Physics.Raycast(ledgeChecker.position + Vector3.up * offsetYMoveOnLedge + Vector3.right * -offsetXMoveOnLedge, ledgeChecker.forward, out climbabableRay, rayLength + 0.5f, ledgeMask))
-        {
-            //Spawn debug ray in scene.
-            Debug.Log($"Can Move Right :: {canMoveLeft}");
-            canMoveLeft = true;
-        }
-        else
-        {
-            canMoveLeft = false;
-        }
+            //Left Ledge Movement Checker
+            if (Physics.Raycast(ledgeChecker.position + Vector3.up * offsetYMoveOnLedge + Vector3.right * -offsetXMoveOnLedge, ledgeChecker.forward, out climbabableRay, rayLength + 0.5f, ledgeMask))
+            {
+                canMoveLeft = true;
+            }
+            else
+            {
+                canMoveLeft = false;
+            }
 
+            ///Checking corners of ledges to see if we can turn or not
+            var lineOffset = .3f;
+            var lineForwardOffset = .5f;
+
+            if (!canMoveRight)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    Debug.DrawRay(ledgeChecker.position + ledgeChecker.forward * lineForwardOffset + ledgeChecker.right * lineOffset + Vector3.up * .025f * i, -ledgeChecker.right * .5f, Color.cyan);
+                    Debug.Log($"Can Turn Right :: {canTurnCorner}");
+                    canTurnCorner = Physics.Raycast(ledgeChecker.position + ledgeChecker.forward * lineForwardOffset + ledgeChecker.right * lineOffset + Vector3.up * .025f * i, -ledgeChecker.right, out cornerLedgeRay, .5f, ledgeMask);
+
+                    if (canTurnCorner)
+                    {
+                        //Spawn debug ray in scene.
+                        Debug.DrawRay(ledgeChecker.position + Vector3.up * offset * i, ledgeChecker.forward * rayLength, Color.red);
+
+                        //Get the gameObject that is hit and then find the top point of the collider to create a hanging position for the player.
+
+                        if (ledgeObject == null)
+                            ledgeObject = cornerLedgeRay.collider.gameObject;
+                        //Represents y distance between raycast hit and top of ledge
+                        float ledgeHeight = 0f;
+
+                        //Get the top height of the mesh
+                        Vector3 topCollider = cornerLedgeRay.point;
+                        topCollider.y = cornerLedgeRay.collider.bounds.max.y;
+
+                        //Top point Y of the mesh
+                        var startTopPos = topCollider + Vector3.up * ledgeHeight;
+                        Debug.DrawRay(startTopPos, Vector3.up * -0.1f, Color.red);
+
+                        //New hang position
+                        Vector3 newhangLocation = new Vector3(startTopPos.x, startTopPos.y + offsetY, startTopPos.z + offsetZ);
+                        hangPosition = newhangLocation;
+
+                        Debug.Log($"Next Hang Position :: {newhangLocation}");
+                    }
+                }
+
+            }
+        }
     }
 
 
@@ -200,37 +255,43 @@ public class PlayerLedge : MonoBehaviour
     /// </summary>
     private void CheckForLedge()
     {
+
         //Check for a gameObject with the layer ledge, if hit is true then set canClimb to true.
-        canClimb = Physics.Raycast(ledgeChecker.position, ledgeChecker.forward, out climbabableRay, rayLength, ledgeMask);
-        if (canClimb)
+
+        for (int i = 0; i < 5; i++)
         {
-            //Spawn debug ray in scene.
-            Debug.Log("Can Climb Ledge");
-            Debug.DrawRay(ledgeChecker.position, ledgeChecker.forward * rayLength, Color.red);
+            
+            canClimb = Physics.Raycast(ledgeChecker.position + Vector3.up * offset * i, ledgeChecker.forward, out climbabableRay, rayLength, ledgeMask);
+            if (canClimb)
+            {
+                //Spawn debug ray in scene.
+                Debug.DrawRay(ledgeChecker.position + Vector3.up * offset * i, ledgeChecker.forward * rayLength, Color.red);
 
-            //Get the gameObject that is hit and then find the top point of the collider to create a hanging position for the player.
-            ledgeObject = climbabableRay.collider.gameObject;
-            //Represents y distance between raycast hit and top of ledge
-            float ledgeHeight = 0f;
+                //Get the gameObject that is hit and then find the top point of the collider to create a hanging position for the player.
+                ledgeObject = climbabableRay.collider.gameObject;
+                //Represents y distance between raycast hit and top of ledge
+                float ledgeHeight = 0f;
 
-            //Get the top height of the mesh
-            Vector3 topCollider = climbabableRay.point;
-            topCollider.y = climbabableRay.collider.bounds.max.y;
+                //Get the top height of the mesh
+                Vector3 topCollider = climbabableRay.point;
+                topCollider.y = climbabableRay.collider.bounds.max.y;
 
-            //Top point Y of the mesh
-            var startTopPos = topCollider + Vector3.up * ledgeHeight;
-            Debug.DrawRay(startTopPos, Vector3.up * -0.1f, Color.red);
+                //Top point Y of the mesh
+                var startTopPos = topCollider + Vector3.up * ledgeHeight;
+                Debug.DrawRay(startTopPos, Vector3.up * -0.1f, Color.red);
 
-            //New hang position
-            Vector3 hangLocation = new Vector3(startTopPos.x, startTopPos.y + offsetY, startTopPos.z + offsetZ);
-            hangPosition = hangLocation;
+                //New hang position
+                Vector3 hangLocation = new Vector3(startTopPos.x, startTopPos.y + offsetY, startTopPos.z + offsetZ);
+                hangPosition = hangLocation;
 
+            }
+            else
+            {
+                Debug.DrawRay(ledgeChecker.position + Vector3.up * offset * i, ledgeChecker.forward * rayLength, Color.blue);
+            }
         }
-        else
-        {
-            Debug.DrawRay(ledgeChecker.position, ledgeChecker.forward * rayLength, Color.blue);
-        }
 
+       
     }
 
     /// <summary>
@@ -243,7 +304,6 @@ public class PlayerLedge : MonoBehaviour
         Debug.DrawRay(ledgeChecker.position + Vector3.up * 1.5f, ledgeChecker.forward * (rayLength + 1f), Color.cyan);
         if (!Physics.Raycast(ledgeChecker.position + Vector3.up * 1.5f, ledgeChecker.forward, rayLength + 1f))
         {
-            Debug.Log("Can Climb On Top");
             canClimbOnTop = true;
         }
     }
@@ -277,23 +337,17 @@ public class PlayerLedge : MonoBehaviour
         if (canClimb)
         {
             //Start Ledge hang from on ground
-            if (UnityEngine.Input.GetKeyDown(climbButton) && canClimb && !isHanging && playerMovement.grounded)
+            if (UnityEngine.Input.GetKeyDown(climbButton) && canClimb && !isHanging)
             {
-                Debug.Log("Grab ledge");
                 StartCoroutine("StartLedgeGrab");
             }
 
-            //Start Ledge hang from falling
-            if (UnityEngine.Input.GetKey(climbButton) && canClimb && !isHanging && !playerMovement.grounded)
-            {
-                Debug.Log("Grab ledge");
-                //StartCoroutine("StartLedgeGrabInAir");
+        }
 
-
-                playerAnimationController.HangAnimationStart();
-                rb.linearVelocity = Vector3.zero;
-                transform.position = hangPosition;
-            }
+        //Drop from ledge
+        if (UnityEngine.Input.GetKeyDown(KeyCode.Backspace) && isHanging)
+        {
+            StartCoroutine("DropFromLedge");
         }
 
         if (isHanging && !startClimbOnTop)
@@ -301,17 +355,20 @@ public class PlayerLedge : MonoBehaviour
             //Move player right while on ledge
             if (UnityEngine.Input.GetKey(moveRightButton) && canMoveRight)
             {
-                Debug.Log("Move on right side of ledge");
+
                 rb.AddForce(Vector3.right * horizontalInput * ledgeMoveSpeed);
             } else
             if (UnityEngine.Input.GetKey(moveLeftButton) && canMoveLeft)//Move player left while on ledge
             {
-                Debug.Log("Move on left side of ledge");
+     
                 rb.AddForce(Vector3.right * horizontalInput * ledgeMoveSpeed);
             }
             else
             {
-                rb.linearVelocity = Vector3.zero;
+                if (!isTurningCorner)
+                {
+                    rb.linearVelocity = Vector3.zero;
+                }
             }
         }
 
@@ -320,9 +377,17 @@ public class PlayerLedge : MonoBehaviour
             //Climb on top of platform
             if (UnityEngine.Input.GetKeyDown("space"))
             {
-                Debug.Log("Climbing On Top");
                 StartCoroutine("ClimbOnTopLedge");
             }
+        }
+
+
+        ///Turn corner of ledge 
+
+        if (UnityEngine.Input.GetKeyDown(moveRightButton) && canTurnCorner)
+        {
+            Debug.Log("Turn Right on ledge corner");
+            StartCoroutine("TurnCorner");
         }
     }
 
@@ -363,7 +428,11 @@ public class PlayerLedge : MonoBehaviour
         playerCamera.enabled = false;
         rb.useGravity = false;
         startClimb = true;
-        rb.AddForce(Vector3.up * 20f);
+
+        if (playerMovement.grounded)
+        {
+            rb.AddForce(Vector3.up * 20f);
+        }
         //Set player controller to face ledge
         transform.forward = -climbabableRay.normal;
 
@@ -381,6 +450,25 @@ public class PlayerLedge : MonoBehaviour
         
     }
 
+    /// <summary>
+    /// Activates player movement on ledge
+    /// </summary>
+    /// <returns></returns>
+
+    IEnumerator DropFromLedge()
+    {
+        playerAnimationController.HangAnimationEnd();
+        Switch = false;
+        playerMovement.enabled = false;
+        dropFromLedge = true;
+        yield return new WaitForSeconds(2.5f);
+        Switch = true;
+        playerMovement.enabled = false;
+        dropFromLedge = false;
+        isHanging = false;
+    }
+
+
 
     /// <summary>
     /// StartLedgeGrab is responsible for setting the player position to the new hanging position and state.
@@ -389,27 +477,16 @@ public class PlayerLedge : MonoBehaviour
     /// </summary>
     /// <returns></returns>
 
-    IEnumerator StartLedgeGrabInAir()
+    IEnumerator TurnCorner()
     {
-        playerCamera.ledgeCamera = true;
-        playerMovement.enabled = false;
-        playerCamera.enabled = false;
-        rb.useGravity = false;
-        startClimb = true;
-        //Set player controller to face ledge
-        transform.forward = -climbabableRay.normal;
-
-        //Set player mesh/model to face ledge
-        playerObjectModel.forward = -climbabableRay.normal;
-        yield return new WaitForSeconds(.75f);
-
-        playerAnimationController.HangAnimationStart();
-        rb.linearVelocity = Vector3.zero;
-        transform.position = hangPosition;
-        playerCamera.enabled = true;
-
-        startClimb = false;
-        isHanging = true;
+        isTurningCorner = true;
+        transform.LookAt(ledgeObject.transform);
+        playerObjectModel.LookAt(ledgeObject.transform);
+  
+        rb.AddForce(Vector3.right * 60f);
+        rb.AddForce(Vector3.forward * 60f);
+        yield return new WaitForSeconds(1f);
+        isTurningCorner = false;
 
     }
 
@@ -429,17 +506,12 @@ public class PlayerLedge : MonoBehaviour
 
         yield return new WaitForSeconds(2.5f);
         rb.linearVelocity = Vector3.zero;
-        Debug.Log("Move forward ledge");
 
         yield return new WaitForSeconds(0.2f);
 
         rb.AddForce(transform.forward * 30f);
 
         yield return new WaitForSeconds(1.3f);
-
-
-        Debug.Log("Move forward ledge");
-
 
 
         rb.useGravity = true;
