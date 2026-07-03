@@ -47,6 +47,9 @@ public class PlayerLedge : MonoBehaviour
     public float offsetX;
     private Vector3 hangPosition;
 
+    Vector3 moveDirection;
+    public Transform orientation;
+
     [SerializeField]
     private float offset = -0.01f;
     public float offsetYMoveOnLedge;
@@ -123,6 +126,11 @@ public class PlayerLedge : MonoBehaviour
                     CheckForTopSurface();
                 }
             }
+            else
+            {
+                transform.LookAt(ledgeObject.transform);
+                playerObjectModel.LookAt(ledgeObject.transform);
+            }
                 FaceForward();
 
             OnKeyPressed();
@@ -179,6 +187,9 @@ public class PlayerLedge : MonoBehaviour
     {
         if (canMove)
         {
+            // calculate movement direction
+            moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
+
             Debug.DrawRay(ledgeChecker.position + Vector3.up * offsetYMoveOnLedge + Vector3.right * offsetXMoveOnLedge, ledgeChecker.forward * rayLength, Color.red);
             Debug.DrawRay(ledgeChecker.position + Vector3.up * offsetYMoveOnLedge + Vector3.right * -offsetXMoveOnLedge, ledgeChecker.forward * rayLength, Color.red);
 
@@ -306,6 +317,7 @@ public class PlayerLedge : MonoBehaviour
         {
             canClimbOnTop = true;
         }
+
     }
 
     /// <summary>
@@ -323,6 +335,7 @@ public class PlayerLedge : MonoBehaviour
             if (flatVel.magnitude > ledgeMoveSpeed)
             {
                 Vector3 limitedVel = flatVel.normalized * ledgeMoveSpeed;
+
                 rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
             }
         }
@@ -356,12 +369,12 @@ public class PlayerLedge : MonoBehaviour
             if (UnityEngine.Input.GetKey(moveRightButton) && canMoveRight)
             {
 
-                rb.AddForce(Vector3.right * horizontalInput * ledgeMoveSpeed);
+                rb.AddForce(moveDirection.normalized * ledgeMoveSpeed * 10f, ForceMode.Force);
             } else
             if (UnityEngine.Input.GetKey(moveLeftButton) && canMoveLeft)//Move player left while on ledge
             {
-     
-                rb.AddForce(Vector3.right * horizontalInput * ledgeMoveSpeed);
+
+                rb.AddForce(moveDirection.normalized * ledgeMoveSpeed * 10f, ForceMode.Force);
             }
             else
             {
@@ -471,23 +484,20 @@ public class PlayerLedge : MonoBehaviour
 
 
     /// <summary>
-    /// StartLedgeGrab is responsible for setting the player position to the new hanging position and state.
-    /// when the coroutine starts the gravity, player movement, and camera movement are disabled to prevent movement errors.
-    /// startClimb is set to true which activates the idle to hang animation. When the coroutine ends the player location will be set to the hangPosition, and the hang animation weight layer will be set to 1.
+    /// TurnCorner is responsible for changing the player location to the other side of the turningon point of the ledge.
+    /// The function moves the player to the far end of the corner, then it moves the player forward horizontally along the surface to the new hanging point
     /// </summary>
     /// <returns></returns>
 
     IEnumerator TurnCorner()
     {
         isTurningCorner = true;
-        transform.LookAt(ledgeObject.transform);
-        playerObjectModel.LookAt(ledgeObject.transform);
   
-        rb.AddForce(Vector3.right * 60f);
-        rb.AddForce(Vector3.forward * 60f);
+        rb.AddForce(Vector3.right * 160f);
+        rb.AddForce(transform.forward * 260f);
         yield return new WaitForSeconds(1f);
+        rb.AddForce(transform.right * 260f);
         isTurningCorner = false;
-
     }
 
     /// <summary>
