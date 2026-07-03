@@ -49,6 +49,10 @@ public class PlayerAnimationController : MonoBehaviour
         return animator;
     }
 
+    /// <summary>
+    /// Links bool from the animator to bools from different script instances. Also input handling is handled here as well. 
+    /// When the player presses a specific key and the conditions are met then an animation will play.
+    /// </summary>
     private void LinkAnimatorToPlayer()
     {
         animator.SetBool("On Ground", movement.OnGround());

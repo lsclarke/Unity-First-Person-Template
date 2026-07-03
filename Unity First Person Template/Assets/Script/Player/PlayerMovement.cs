@@ -4,22 +4,32 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    /// <summary>
+    /// These variables are responsible for all the player ground movement and move state condiditons
+    /// </summary>
     [Header("Movement")]
+    Vector3 moveDirection;
+    float horizontalInput;
+    float verticalInput;
     public float stompTimer = 0;
-    [SerializeField]
-
     public bool canMove;
     private float moveSpeed;
     public float walkSpeed;
     public float sprintSpeed;
     public bool isWalking = false;
     public bool isRunning = false;
-
     public float groundDrag;
+    Rigidbody rb;
+
+    [Space(5f)]
+    public MovementState state;
+    [Space(5f)]
 
     [Header("Stamina")]
     private float stamina = 0f;
-    const float MAX_STAMINA = 100F;
+    const float MAX_STAMINA = 100f;
+    [Space(5f)]
+
 
     [Header("Jumping")]
     public float jumpForce;
@@ -27,9 +37,10 @@ public class PlayerMovement : MonoBehaviour
     public float airMultiplier;
     public bool jumpButtonPressed = false;
     bool readyToJump;
-    bool playerLanded = false;  
+    bool playerLanded = false;
+    [Space(5f)]
 
-    public GameObject PlayerObj;
+
 
 
     [Header("Crouching")]
@@ -37,6 +48,7 @@ public class PlayerMovement : MonoBehaviour
     public float crouchYScale;
     private float startYScale;
 
+    //Player Input Keys
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space;
     public KeyCode sprintKey = KeyCode.LeftShift;
@@ -47,10 +59,11 @@ public class PlayerMovement : MonoBehaviour
     public float playerHeight;
     public LayerMask whatIsGround;
     public bool grounded;
-
+    public Transform orientation;
     public PhysicsMaterial[] physicsMaterialsArray;
     [SerializeField]
-    private CapsuleCollider playerObject;
+    private CapsuleCollider playerObjectCollider;
+    public GameObject PlayerObj;
 
     [Header("Slope Handling")]
     public float maxSlopeAngle;
@@ -61,16 +74,9 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField]
     private PlayerLedge ledge;
-    public Transform orientation;
 
-    float horizontalInput;
-    float verticalInput;
 
-    Vector3 moveDirection;
-
-    Rigidbody rb;
-
-    public MovementState state;
+    
     public enum MovementState
     {
         walking,
@@ -92,6 +98,7 @@ public class PlayerMovement : MonoBehaviour
         stamina = MAX_STAMINA;
     }
 
+    //Player Stamina
     public float GetPlayerStamina
     {
         get{
@@ -104,12 +111,16 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// The Update method is the main method that checks every frame.
+    /// </summary>
     private void Update()
     {
         // ground check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight, whatIsGround);
-
         Debug.DrawLine(this.transform.position, new Vector3(transform.position.x, transform.position.y - (playerHeight * 0.5f + 0.2f), transform.position.z), Color.yellow);
+
+
         MyInput();
         SpeedControl();
         StateHandler();
@@ -120,6 +131,7 @@ public class PlayerMovement : MonoBehaviour
             rb.linearDamping = groundDrag;
             Invoke(nameof(ResetPlayerObj), 0.1f);
 
+            //Reset movement back to walk speed
             if (!isRunning)
             {
                 moveSpeed = walkSpeed;
@@ -129,11 +141,11 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.linearDamping = 0;
         }
-
     }
 
-
-
+    /// <summary>
+    /// FixedUpdate method is menat for anything physics related
+    /// </summary>
     private void FixedUpdate()
     {
         if (canMove)
@@ -142,17 +154,22 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    //Custom Friciton method that switches physics material depending on the movement
     public void Friction()
     {
         if (grounded || ledge.isHanging)
         {
-            playerObject.material = physicsMaterialsArray[0];
+            playerObjectCollider.material = physicsMaterialsArray[0];
         }
         else
         {
-            playerObject.material = physicsMaterialsArray[1];
+            playerObjectCollider.material = physicsMaterialsArray[1];
         }
     }
+
+    /// <summary>
+    /// MyInput Method handles all the player input and keybinds
+    /// </summary>
     private void MyInput()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -180,10 +197,12 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
         }
-
     }
 
-
+    /// <summary>
+    /// StateHandler handles all the state logic. The run logic is within the StateHandler, and is only capable when the stamina is greater than 0.
+    /// There is also a reset for the stamina when the player is no longer in run mode
+    /// </summary>
     private void StateHandler()
     {
         if (Input.GetKeyUp(sprintKey) && stamina < MAX_STAMINA) 
@@ -237,6 +256,9 @@ public class PlayerMovement : MonoBehaviour
         stamina = MAX_STAMINA;
     }
 
+    /// <summary>
+    /// Move Player handles all the basic player movement logic. Ground, slope and air movement physics is applied in this script
+    /// </summary>
     private void MovePlayer()
     {
         // calculate movement direction
@@ -271,16 +293,17 @@ public class PlayerMovement : MonoBehaviour
         // on ground
         else if (grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
-        //on ledge
-        //else if (ledge.isHanging)
-        //    rb.AddForce(moveDirection.normalized * walkSpeed * .2f, ForceMode.Force);
         // in air
         else if (!grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
         // turn gravity off while on slope
-        //rb.useGravity = !OnSlope();
+        rb.useGravity = !OnSlope();
     }
+
+    /// <summary>
+    /// Controls the speed of the player controller on different surfaces and slopes. Limited velocity is also created to ensure the player doesn't blitz of the screen.
+    /// </summary>
 
     private void SpeedControl()
     {
@@ -309,7 +332,11 @@ public class PlayerMovement : MonoBehaviour
     {
         PlayerObj.SetActive(true);
     }
+    
 
+    /// <summary>
+    /// Jump method is the force applied when the junp button is pressed
+    /// </summary>
     private void Jump()
     {
         exitingSlope = true;
@@ -326,6 +353,10 @@ public class PlayerMovement : MonoBehaviour
         exitingSlope = false;
     }
 
+    /// <summary>
+    /// Raycast detector for findng slope surfaces
+    /// </summary>
+    /// <returns></returns>
     private bool OnSlope()
     {
         if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight * 0.5f + 0.3f))
