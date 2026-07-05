@@ -59,7 +59,7 @@ public class PlayerAnimationController : MonoBehaviour
         animator.SetBool("JumpButtonPressed", movement.jumpButtonPressed);
         animator.SetFloat("Velocity X", velocityX);
         animator.SetFloat("Velocity Z", velocityZ);
-        animator.SetBool("isHurt", health.isHurt);
+        animator.SetBool("isHit", health.isHurt);
         animator.SetBool("isHanging", ledge.isHanging);
         animator.SetBool("StartHang", ledge.GetStartClimb());
         animator.SetBool("ClimbUp", ledge.GetStartClimbOnTop());

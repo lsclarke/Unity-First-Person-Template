@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerCamera : MonoBehaviour
 {
@@ -52,6 +53,9 @@ public class PlayerCamera : MonoBehaviour
         {
             StandardFPSCamera();
         }
+
+        if (Input.GetKey(KeyCode.Backspace))
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
     }
 

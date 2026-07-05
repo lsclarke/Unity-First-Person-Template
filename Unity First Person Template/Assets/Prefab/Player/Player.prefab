@@ -475,7 +475,7 @@ MonoBehaviour:
   offsetY: -1.2
   offsetX: 0.005
   orientation: {fileID: 426328980054964068}
-  offset: -0.01
+  offset: 0.05
   offsetYMoveOnLedge: 0.4
   offsetXMoveOnLedge: 0.15
   Switch: 0
